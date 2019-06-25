@@ -1,33 +1,23 @@
-using LinearAlgebra
+include("./Quju.jl")
 
-ZERO = Float32(1) * [1, 0]
-ONE = Float32(1) * [0, 1]
+update = (z1, z2) -> ( push!(z1[1], z2[1]) , z2[2] )
 
-eye = Matrix{Float32}(I, 2, 2)
-H = Float32(1/sqrt(2)) * [1 1; 1 -1]
-M₀ = ZERO * ZERO'
-M₁ = ONE * ONE'
-
-register = (n) -> foldl(kron, fill(ZERO, n))
-hadamard = (n) -> foldl(kron, fill(H, n))
-
-lift = (n, k, op) -> foldl(kron, map(it -> (it == k) ? op : eye, collect(1:n)))
-
-measure = (n, k, qubits) -> begin
-         result = rand() > qubits' * lift(n, k, M₀) * qubits
-         (result, normalize(lift(n, k, (result ? M₁ : M₀)) * qubits))
-       end
-
-measureAll = (n, qubits) -> begin
-         results = [];
-         for k in 1:n
-           result, qubits = measure(n, k, qubits)
-           push!(results, result)
-         end
-         results, qubits
-       end
+measureAllf = (n, qubits) -> reduce((acc, k) -> update(acc, measure!(n, k, acc[2])), 1:n, init = ([], qubits))
 
 toInt = (b) -> reduce((acc, v) -> 2*acc + (v ? 1 : 0), b, init=0)
 
-qubits = hadamard(3) * register(3)
-print(toInt(measureAll(3, qubits)[1]))
+for meas in [measureAll, measureAllf]
+    for n in 1:14
+        @time print(toInt(meas(n, hadamard(n) * register(n))[1]))
+    end
+end
+
+
+M = lift(10, 5, H)
+
+special(n) = 2 * register(n) * register(n)' - sparse(I, 2^n, 2^n)
+
+A = lift(10,5,H)
+x = rand(1048576)
+mul!(A, x, 1.0)
+
