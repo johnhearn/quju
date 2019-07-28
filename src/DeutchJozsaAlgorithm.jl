@@ -10,7 +10,7 @@ deutchJosza(Uf) = register(ZERO, ZERO, ONE) |>
                 gate(Uf) |>
                 gate(H, H, eye) |>
                 measure(1:2) |>
-                (y) -> reinterpret(Int, y.chunks)[1] != 0
+                (y) -> toInt(y) != 0
 
 
 Uf1 = oracle(2, 1, (x, y) -> y ⊻ 0)
