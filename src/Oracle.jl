@@ -36,7 +36,3 @@ oracle(m::Int, n::Int, f) = begin
 end
 
 format(x::Int, width::Int) = string(x,base=2,pad=width)
-
-oracleXor(m::Int, n::Int, f) = begin
-    oracle(m, n, (x, y) -> y ⊻ f(x))
-end

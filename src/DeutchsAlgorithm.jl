@@ -19,6 +19,8 @@ Uf4 = blockdiag(NOT, NOT)
 
 @test map(deutch, [Uf1, Uf2, Uf3, Uf4]) == [false, true, true, false]
 
+oracleXor(m::Int, n::Int, f) = oracle(m, n, (x, y) -> y ⊻ f(x))
+
 Uf1 = oracleXor(1, 1, (x) -> 0)
 Uf2 = oracle(1, 1, (x, y) -> y ⊻ x)
 Uf3 = oracle(1, 1, (x, y) -> y ⊻ (x ⊻ 1))
