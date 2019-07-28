@@ -13,11 +13,13 @@ M₁ = ONE * ONE'
 ⊗ = kron
 
 register(n::Int) = register(fill(ZERO, n))
-register(x::Vector...) = foldl(⊗, x)
-hadamard(n) = foldl(⊗, fill(H, n))
-gate(A...) = (qubits) -> foldl(⊗, A) * qubits
+register(x...) = register(collect(x))
+register(xs) = foldl(⊗, xs)
 
-@memoize lift(n, k, op) = foldl(kron, map(it -> (it == k) ? op : eye, collect(1:n)))
+gate(A...) = gate(collect(A))
+gate(As) = (qubits) -> foldl(⊗, As) * qubits
+
+@memoize lift(n, k, op) = foldl(⊗, map(it -> (it == k) ? op : eye, collect(1:n)))
 
 #@memoize lift(n, k, op) = (n == 0) ? [1] : kron(((n == k) ? op : eye), lift(n - 1, k, op))
 
@@ -50,9 +52,15 @@ measure!(n::Int, range::UnitRange, qubits) = begin
 Measures all the bits of an n-bit register, updating the register.
 """
 measureAll!(n::Int, qubits) = measure!(n, 1:n, qubits)
-measureAll!(qubits) = measureAll!(size(qubits), qubits)
+measureAll!(qubits) = measureAll!(num(qubits), qubits)
 
 """
-Utility functions
+Calculates the number of bits represented by the qubits vector.
 """
-num(qubits) = Int(floor(log2(length(qubits))))
+num(qubits)::Int = Int(floor(log2(length(qubits))))
+
+"""
+Converts a bit arrays to integers, most significant bit first.
+"""
+toInt(results::Tuple{BitArray{1},Array{Numtype,1}}) = toInt(results[1])
+toInt(bits::BitArray{1}) = reinterpret(Int, bits.chunks)[1]
