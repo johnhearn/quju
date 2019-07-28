@@ -27,7 +27,7 @@ Returns a tuples containing the boolean measured value and the resulting registe
 """
 measure!(n::Int, k::Int, qubits) = begin
          U = lift(n, k, M₀)
-         result = rand() > qubits' * U * qubits
+         result = rand(Float32) > Float32(qubits' * U * qubits)
          M = result ? lift(n, k, M₁) : U
          (result, normalize(M * qubits))
        end
